@@ -24,9 +24,11 @@
   "license": "MIT",
   "homepage": "https://github.com/wlsf82/cypress-do-zero-a-nuvem#readme",
   "devDependencies": {
+    "@faker-js/faker": "^9.5.0",
     "cypress": "^14.0.2"
   },
   "dependencies": {
-    "cypress-do-zero-a-nuvem": "file:"
+    "cypress-do-zero-a-nuvem": "file:",
+    "faker": "^5.5.3"
   }
 }
