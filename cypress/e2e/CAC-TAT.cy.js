@@ -1,4 +1,7 @@
 const { faker } = require("@faker-js/faker");
+const { phone_number } = require("faker/lib/locales/az");
+const { cell_phone } = require("faker/lib/locales/pt_PT");
+const Phone = require("faker/lib/phone_number");
 
 const elements = {
   labelFirstName: "[for=firstName]",
@@ -22,11 +25,19 @@ const elements = {
   expectedError: "Valide os campos obrigatórios!",
 };
 
-class MessageForm {
-  preencherCamposObrigatorios() {
-    const firstName = faker.person.firstName();
-    const lastName = faker.person.lastName();
+const firstName = faker.person.firstName();
+const lastName = faker.person.lastName();
+const validEmail = faker.internet.email({
+  firstName: firstName.toLowerCase(),
+  lastName: lastName.toLowerCase(),
+});
+const invalidEmail = validEmail.replace("@", "#");
+//const phone = faker.finance.accountNumber(11)
+const phone = cell_phone;
+const message = faker.lorem.paragraph(2);
 
+class MessageForm {
+  preencherCamposObrigatorios(firstName, lastName, email, phone, message) {
     cy.get(elements.labelFirstName).then(() => {
       if (
         cy
@@ -56,19 +67,14 @@ class MessageForm {
           .should("be.visible")
           .contains(elements.expectedRequired)
       ) {
-        cy.get(elements.inputEmail).type(
-          faker.internet.email({
-            firstName: firstName.toLowerCase(),
-            lastName: lastName.toLowerCase(),
-          })
-        );
+        cy.get(elements.inputEmail).type(email);
       }
     });
 
     cy.get(elements.labelPhone).then(() => {
       cy.get(elements.spanPhone).then(($span) => {
         if ($span.is(":visible")) {
-          cy.get(elements.inputPhone).type(faker.finance.accountNumber(11));
+          cy.get(elements.inputPhone).type(phone);
         }
       });
     });
@@ -80,7 +86,7 @@ class MessageForm {
           .should("be.visible")
           .contains(elements.expectedRequired)
       ) {
-        cy.get(elements.textAreaMessage).type(faker.lorem.paragraph(2));
+        cy.get(elements.textAreaMessage).type(message, { delay: 0 });
       }
     });
   }
@@ -92,6 +98,59 @@ class MessageForm {
   }
   validarMensagemErro() {
     cy.get(elements.spamError).contains(elements.expectedError).click();
+  }
+  enviarMensagemComSucesso() {
+    this.preencherCamposObrigatorios(
+      firstName,
+      lastName,
+      validEmail,
+      phone,
+      message
+    );
+    this.enviarMensagem();
+    this.validarMensagemSucesso();
+  }
+  bloquearMensagemSemCamposObrigatorios() {
+    this.enviarMensagem();
+    this.validarMensagemErro();
+  }
+  bloquearMensagemComEmailInvalido() {
+    this.preencherCamposObrigatorios(
+      firstName,
+      lastName,
+      invalidEmail,
+      phone,
+      message
+    );
+    this.enviarMensagem();
+    this.validarMensagemErro();
+  }
+  bloquearMensagemSemNome() {
+    this.preencherCamposObrigatorios(
+      " ",
+      lastName,
+      invalidEmail,
+      phone,
+      message
+    );
+    this.enviarMensagem();
+    this.validarMensagemErro();
+  }
+  bloquearMensagemSemSobreNome() {
+    this.preencherCamposObrigatorios(
+      firstName,
+      " ",
+      invalidEmail,
+      phone,
+      message
+    );
+    this.enviarMensagem();
+    this.validarMensagemErro();
+  }
+  bloquearMensagemSemEmail() {
+    this.preencherCamposObrigatorios(firstName, lastName, " ", phone, message);
+    this.enviarMensagem();
+    this.validarMensagemErro();
   }
 }
 
@@ -107,12 +166,26 @@ describe("Central de Atendimento ao Cliente TAT", () => {
   });
 
   it("Enviar mensagem com sucesso", () => {
-    msgForm.preencherCamposObrigatorios();
-    msgForm.enviarMensagem();
-    msgForm.validarMensagemSucesso();
+    msgForm.enviarMensagemComSucesso();
   });
 
-  it("Bloquear mensagem sem campos obrigaórios", () => {
-    msgForm.enviarMensagem();
+  it("Bloquear mensagem sem campos obrigatórios", () => {
+    msgForm.bloquearMensagemSemCamposObrigatorios();
+  });
+
+  it("Bloquear mensagem com email inválido", () => {
+    msgForm.bloquearMensagemComEmailInvalido();
+  });
+
+  it("Bloquear mensagem sem nome", () => {
+    msgForm.bloquearMensagemSemNome();
+  });
+
+  it("Bloquear mensagem sem sobrenome", () => {
+    msgForm.bloquearMensagemSemSobreNome();
+  });
+
+  it("Bloquear mensagem sem email", () => {
+    msgForm.bloquearMensagemSemEmail();
   });
 });
