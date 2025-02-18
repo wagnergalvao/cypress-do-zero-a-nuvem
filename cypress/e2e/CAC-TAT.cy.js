@@ -142,6 +142,16 @@ class MessageForm {
     this.enviarMensagem();
     this.validarMensagemErro();
   }
+  aceitarSomenteNumerosNoTelefone() {
+    this.marcarTelefoneCheckbox();
+    this.preencherCamposObrigatorios(
+      null,
+      null,
+      null,
+      phone,
+      "Telefone digitado: " + phone
+    );
+  }
   bloquearMensagemSemNome() {
     this.preencherCamposObrigatorios(null, lastName, email, phone, message);
     this.enviarMensagem();
@@ -203,6 +213,10 @@ describe("Central de Atendimento ao Cliente TAT", () => {
 
   it("Enviar mensagem com sucesso", () => {
     msgForm.enviarMensagemComSucesso();
+  });
+
+  it("Aceitar somente números no telefone", () => {
+    msgForm.aceitarSomenteNumerosNoTelefone();
   });
 
   it("Enviar mensagem com telefone obrigatório", () => {
