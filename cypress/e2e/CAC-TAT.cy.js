@@ -25,11 +25,20 @@ const elements = {
 var firstName = null;
 var lastName = null;
 var email = null;
-var notEmail = null;
 var phone = null;
 var message = null;
 
 class MessageForm {
+  gerarDadosFake() {
+    firstName = faker.person.firstName();
+    lastName = faker.person.lastName();
+    email = faker.internet.email({
+      firstName: firstName.toLowerCase(),
+      lastName: lastName.toLowerCase(),
+    });
+    phone = faker.phone.number({ style: "national" });
+    message = faker.lorem.paragraph(2);
+  }
   preencherCamposObrigatorios(firstName, lastName, email, phone, message) {
     cy.get(elements.labelFirstName).then(() => {
       if (
@@ -135,7 +144,7 @@ class MessageForm {
     this.preencherCamposObrigatorios(
       firstName,
       lastName,
-      notEmail,
+      email.replace("@", "#"),
       phone,
       message
     );
@@ -190,20 +199,43 @@ class MessageForm {
       });
     });
   }
+  limparCamposDigitados() {
+    if (cy.get(elements.inputFirstName)) {
+      cy.get(elements.inputFirstName).clear();
+    }
+    if (cy.get(elements.inputLastName)) {
+      cy.get(elements.inputLastName).clear();
+    }
+    if (cy.get(elements.inputEmail)) {
+      cy.get(elements.inputEmail).clear();
+    }
+    if (cy.get(elements.inputPhone)) {
+      cy.get(elements.inputPhone).clear();
+    }
+    if (cy.get(elements.textAreaMessage)) {
+      cy.get(elements.textAreaMessage).clear();
+    }
+  }
+  trocarDadosDoUsuarioDigitado() {
+    this.preencherCamposObrigatorios(firstName, lastName, email, phone, null);
+    this.limparCamposDigitados();
+    this.desmarcarTelefoneCheckbox();
+    this.gerarDadosFake();
+    this.marcarTelefoneCheckbox();
+    this.preencherCamposObrigatorios(
+      firstName,
+      lastName,
+      email,
+      phone,
+      message
+    );
+  }
 }
 describe("Central de Atendimento ao Cliente TAT", () => {
   const msgForm = new MessageForm();
 
   beforeEach(() => {
-    firstName = faker.person.firstName();
-    lastName = faker.person.lastName();
-    email = faker.internet.email({
-      firstName: firstName.toLowerCase(),
-      lastName: lastName.toLowerCase(),
-    });
-    notEmail = email.replace("@", "#");
-    phone = faker.phone.number({ style: "national" });
-    message = faker.lorem.paragraph(2);
+    msgForm.gerarDadosFake();
     cy.visit("./src/index.html");
   });
 
@@ -221,6 +253,12 @@ describe("Central de Atendimento ao Cliente TAT", () => {
 
   it("Enviar mensagem com telefone obrigatório", () => {
     msgForm.enviarMensagemComTelefoneObrigatorio();
+  });
+
+  it("Trocar dados do usuário e enviar a mensagem com o novo usuário", () => {
+    msgForm.trocarDadosDoUsuarioDigitado();
+    msgForm.enviarMensagem();
+    msgForm.validarMensagemSucesso();
   });
 
   it("Bloquear mensagem sem campos obrigatórios", () => {
