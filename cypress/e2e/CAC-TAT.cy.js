@@ -108,10 +108,14 @@ class MessageForm {
     cy.get(elements.buttonSubmit).contains(elements.expectedSubmit).click();
   }
   validarMensagemSucesso() {
-    cy.get(elements.spamSuccess).contains(elements.expectedSuccess).click();
+    cy.get(elements.spamSuccess)
+      .should("be.visible")
+      .contains(elements.expectedSuccess);
   }
   validarMensagemErro() {
-    cy.get(elements.spamError).contains(elements.expectedError).click();
+    cy.get(elements.spamError)
+      .should("be.visible")
+      .contains(elements.expectedError);
   }
   enviarMensagemComSucesso() {
     this.preencherCamposObrigatorios(
@@ -283,5 +287,19 @@ describe("Central de Atendimento ao Cliente TAT", () => {
 
   it("Bloquear mensagem sem texto", () => {
     msgForm.bloquearMensagemSemCamposObrigatorios();
+  });
+
+  it("Enviar mensagem com sucesso usando custom commands", () => {
+    cy.submitForm(elements, firstName, lastName, email, phone, message);
+    cy.get(elements.spamSuccess)
+      .contains(elements.expectedSuccess)
+      .should("be.visible");
+  });
+
+  it("Enviar mensagem com sucesso usando custom commands", () => {
+    cy.submitForm(elements, firstName, lastName, email, phone, message);
+    cy.get(elements.spamSuccess)
+      .contains(elements.expectedSuccess)
+      .should("be.visible");
   });
 });
