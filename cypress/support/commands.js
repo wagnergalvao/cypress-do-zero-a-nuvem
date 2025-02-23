@@ -27,15 +27,7 @@
 Cypress.Commands.add(
   "submitForm",
   (elements, firstName, lastName, email, phone, message, result) => {
-    cy.get(elements.labelPhoneCheckbox).then(() => {
-      cy.get(elements.inputPhoneCheckbox).then(($checkBox) => {
-        if ($checkBox.is(":visible") && !$checkBox.is(":checked")) {
-          cy.get(elements.inputPhoneCheckbox).check();
-        }
-      });
-    });
-
-    cy.get(elements.labelFirstName).then(() => {
+    cy.contains(elements.labelFirstName, elements.expectedLblFN).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -48,7 +40,7 @@ Cypress.Commands.add(
       }
     });
 
-    cy.get(elements.labelLastName).then(() => {
+    cy.contains(elements.labelLastName, elements.expectedLblLN).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -61,7 +53,7 @@ Cypress.Commands.add(
       }
     });
 
-    cy.get(elements.labelEmail).then(() => {
+    cy.contains(elements.labelEmail, elements.expectedLblEm).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -74,7 +66,7 @@ Cypress.Commands.add(
       }
     });
 
-    cy.get(elements.labelPhone).then(() => {
+    cy.contains(elements.labelPhone, elements.expectedLblPh).then(() => {
       cy.get(elements.spanPhone).then(($span) => {
         if ($span.is(":visible")) {
           if (phone !== null) {
@@ -84,7 +76,8 @@ Cypress.Commands.add(
       });
     });
 
-    cy.get(elements.labelMessage).then(() => {
+    cy.contains(elements.labelMessage, elements.expectedLblT1);
+    cy.contains(elements.labelMessage, elements.expectedLblT2).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -99,6 +92,6 @@ Cypress.Commands.add(
       }
     });
 
-    cy.get(elements.buttonSubmit).contains(elements.expectedSubmit).click();
+    cy.contains(elements.buttonSubmit, elements.expectedSubmit).click();
   }
 );

@@ -1,25 +1,31 @@
 import { fakerPT_BR as faker } from "@faker-js/faker";
 const elements = {
   labelFirstName: "[for=firstName]",
+  expectedLblFN: "Nome",
   inputFirstName: "[id=firstName]",
   labelLastName: "[for=lastName]",
+  expectedLblLN: "Sobrenome",
   inputLastName: "[id=lastName]",
+  expectedLblEm: "E-mail",
   labelEmail: "[for=email]",
   inputEmail: "[id=email]",
   labelPhone: "[for=phone]",
+  expectedLblPh: "Telefone",
   inputPhone: "[id=phone]",
   spanPhone: ".phone-label-span.required-mark",
   labelPhoneCheckbox: "[for=phone-checkbox]",
   inputPhoneCheckbox: "[id=phone-checkbox]",
   labelMessage: "[for=open-text-area]",
+  expectedLblT1: "Como podemos te ajudar? ",
+  expectedLblT2: "Algum elogio ou feedback para nós?",
   textAreaMessage: "[id=open-text-area]",
   requiredMark: "[class=required-mark]",
   expectedRequired: "(obrigatório)",
   buttonSubmit: "[type=submit]",
   expectedSubmit: "Enviar",
-  spamSuccess: "[class=success]",
+  spanSuccess: "[class=success]",
   expectedSuccess: "Mensagem enviada com sucesso.",
-  spamError: "[class=error]",
+  spanError: "[class=error]",
   expectedError: "Valide os campos obrigatórios!",
 };
 var firstName = null;
@@ -40,7 +46,7 @@ class MessageForm {
     message = faker.lorem.paragraph(2);
   }
   preencherCamposObrigatorios(firstName, lastName, email, phone, message) {
-    cy.get(elements.labelFirstName).then(() => {
+    cy.contains(elements.labelFirstName, elements.expectedLblFN).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -53,7 +59,7 @@ class MessageForm {
       }
     });
 
-    cy.get(elements.labelLastName).then(() => {
+    cy.contains(elements.labelLastName, elements.expectedLblLN).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -66,7 +72,7 @@ class MessageForm {
       }
     });
 
-    cy.get(elements.labelEmail).then(() => {
+    cy.contains(elements.labelEmail, elements.expectedLblEm).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -79,7 +85,7 @@ class MessageForm {
       }
     });
 
-    cy.get(elements.labelPhone).then(() => {
+    cy.contains(elements.labelPhone, elements.expectedLblPh).then(() => {
       cy.get(elements.spanPhone).then(($span) => {
         if ($span.is(":visible")) {
           if (phone !== null) {
@@ -89,7 +95,8 @@ class MessageForm {
       });
     });
 
-    cy.get(elements.labelMessage).then(() => {
+    cy.contains(elements.labelMessage, elements.expectedLblT1);
+    cy.contains(elements.labelMessage, elements.expectedLblT2).then(() => {
       if (
         cy
           .get(elements.requiredMark)
@@ -105,17 +112,17 @@ class MessageForm {
     });
   }
   enviarMensagem() {
-    cy.get(elements.buttonSubmit).contains(elements.expectedSubmit).click();
+    cy.contains(elements.buttonSubmit, elements.expectedSubmit).click();
   }
   validarMensagemSucesso() {
-    cy.get(elements.spamSuccess)
-      .should("be.visible")
-      .contains(elements.expectedSuccess);
+    cy.contains(elements.spanSuccess, elements.expectedSuccess).should(
+      "be.visible"
+    );
   }
   validarMensagemErro() {
-    cy.get(elements.spamError)
-      .should("be.visible")
-      .contains(elements.expectedError);
+    cy.contains(elements.spanError, elements.expectedError).should(
+      "be.visible"
+    );
   }
   enviarMensagemComSucesso() {
     this.preencherCamposObrigatorios(
@@ -291,15 +298,22 @@ describe("Central de Atendimento ao Cliente TAT", () => {
 
   it("Enviar mensagem com sucesso usando custom commands", () => {
     cy.submitForm(elements, firstName, lastName, email, phone, message);
-    cy.get(elements.spamSuccess)
-      .contains(elements.expectedSuccess)
-      .should("be.visible");
+    cy.contains(elements.spanSuccess, elements.expectedSuccess).should(
+      "be.visible"
+    );
   });
 
-  it("Enviar mensagem com sucesso usando custom commands", () => {
-    cy.submitForm(elements, firstName, lastName, email, phone, message);
-    cy.get(elements.spamSuccess)
-      .contains(elements.expectedSuccess)
-      .should("be.visible");
+  it("Bloquar mensagem com email inválido usando custom commands", () => {
+    cy.submitForm(
+      elements,
+      firstName,
+      lastName,
+      email.replace("@", "#"),
+      phone,
+      message
+    );
+    cy.contains(elements.spanError, elements.expectedError).should(
+      "be.visible"
+    );
   });
 });
