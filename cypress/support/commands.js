@@ -26,72 +26,62 @@
 
 Cypress.Commands.add(
   "submitForm",
-  (elements, firstName, lastName, email, phone, message, result) => {
-    cy.contains(elements.labelFirstName, elements.expectedLblFN).then(() => {
-      if (
-        cy
-          .get(elements.requiredMark)
-          .should("be.visible")
-          .contains(elements.expectedRequired)
-      ) {
-        if (firstName !== null) {
-          cy.get(elements.inputFirstName).type(firstName);
-        }
-      }
-    });
+  (elements, firstName, lastName, email, phone, message) => {
+    if (firstName !== null) {
+      cy.contains(elements.labelFirstName, elements.expectedLblFN).then(() => {
+        cy.contains(elements.requiredMark, elements.expectedRequired).should(
+          "be.visible"
+        );
+        cy.get(elements.inputFirstName).type(firstName);
+      });
+    }
 
-    cy.contains(elements.labelLastName, elements.expectedLblLN).then(() => {
-      if (
-        cy
-          .get(elements.requiredMark)
-          .should("be.visible")
-          .contains(elements.expectedRequired)
-      ) {
-        if (lastName !== null) {
-          cy.get(elements.inputLastName).type(lastName);
-        }
-      }
-    });
+    if (lastName !== null) {
+      cy.contains(elements.labelLastName, elements.expectedLblLN).then(() => {
+        cy.contains(elements.requiredMark, elements.expectedRequired).should(
+          "be.visible"
+        );
+        cy.get(elements.inputLastName).type(lastName);
+      });
+    }
 
-    cy.contains(elements.labelEmail, elements.expectedLblEm).then(() => {
-      if (
-        cy
-          .get(elements.requiredMark)
-          .should("be.visible")
-          .contains(elements.expectedRequired)
-      ) {
-        if (email !== null) {
-          cy.get(elements.inputEmail).type(email);
-        }
-      }
-    });
+    if (email !== null) {
+      cy.contains(elements.labelEmail, elements.expectedLblEm).then(() => {
+        cy.contains(elements.requiredMark, elements.expectedRequired).should(
+          "be.visible"
+        );
+        cy.get(elements.inputEmail).type(email);
+      });
+    }
 
-    cy.contains(elements.labelPhone, elements.expectedLblPh).then(() => {
-      cy.get(elements.spanPhone).then(($span) => {
-        if ($span.is(":visible")) {
-          if (phone !== null) {
-            cy.get(elements.inputPhone).type(phone.replace(/\D/g, ""));
-          }
+    if (phone !== null) {
+      cy.contains(elements.labelPhone, elements.expectedLblPh).then(() => {
+        if (
+          cy
+            .contains(elements.requiredMark, elements.expectedRequired)
+            .should("be.visible")
+        ) {
+          cy.get(elements.inputPhone).type(phone);
         }
       });
-    });
+    }
 
-    cy.contains(elements.labelMessage, elements.expectedLblT1);
-    cy.contains(elements.labelMessage, elements.expectedLblT2).then(() => {
-      if (
-        cy
-          .get(elements.requiredMark)
-          .should("be.visible")
-          .contains(elements.expectedRequired)
-      ) {
-        if (message !== null) {
-          cy.get(elements.textAreaMessage).type(message, {
-            delay: 0,
-          });
-        }
-      }
-    });
+    if (message !== null) {
+      cy.contains(elements.labelMessage, elements.expectedLblT1);
+      cy.contains(elements.labelMessage, elements.expectedLblT2).then(() => {
+        cy.contains(elements.requiredMark, elements.expectedRequired).should(
+          "be.visible"
+        );
+        cy.get(elements.textAreaMessage).type(message, {
+          delay: 0,
+        });
+      });
+    }
 
     cy.contains(elements.buttonSubmit, elements.expectedSubmit).click();
   }
 );
+Cypress.Commands.add("selectProduct", (elements, option) => {
+  cy.contains(elements.labelProduct, elements.expectedLblPr);
+  cy.get(elements.selectProduct).select(option);
+});
