@@ -39,10 +39,7 @@ var lastName = null;
 var email = null;
 var phone = null;
 var message = null;
-var productOption = faker.number.int({
-  min: 0,
-  max: elements.optionsProduct.length - 1,
-});
+var productOption = Date.now() % elements.optionsProduct.length;
 
 class MessageForm {
   gerarDadosFake() {
@@ -313,18 +310,18 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     );
   });
 
-  it.only(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]}`, () => {
-    cy.selectProduct(elements, elements.optionsProduct[productOption]);
+  it(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]} selecionado por seu Texto`, () => {
+    cy.selectProduct(elements, "Text", productOption);
 
-    cy.get(elements.selectProduct).should(
-      "have.value",
-      elements.optionsProduct[productOption]
-    );
+    cy.submitForm(elements, firstName, lastName, email, phone, message);
 
-    cy.get(elements.selectedOptPr).should(
-      "contain.text",
-      elements.expectedProduct[productOption]
+    cy.contains(elements.spanSuccess, elements.expectedSuccess).should(
+      "be.visible"
     );
+  });
+
+  it(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]} selecionado por seu Value`, () => {
+    cy.selectProduct(elements, "", productOption);
 
     cy.submitForm(elements, firstName, lastName, email, phone, message);
 

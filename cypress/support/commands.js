@@ -81,7 +81,30 @@ Cypress.Commands.add(
     cy.contains(elements.buttonSubmit, elements.expectedSubmit).click();
   }
 );
-Cypress.Commands.add("selectProduct", (elements, option) => {
-  cy.contains(elements.labelProduct, elements.expectedLblPr);
-  cy.get(elements.selectProduct).select(option);
-});
+Cypress.Commands.add(
+  "selectProduct",
+  (elements, selectionType, optionNumber) => {
+    var option = null;
+    cy.contains(elements.labelProduct, elements.expectedLblPr);
+    switch (selectionType.toUpperCase()) {
+      case "TEXT":
+        option = elements.expectedProduct[optionNumber];
+        break;
+      case "INDEX":
+        option = optionNumber;
+        break;
+      default:
+        option = elements.optionsProduct[optionNumber];
+        break;
+    }
+    cy.get(elements.selectProduct).select(option);
+    cy.get(elements.selectedOptPr).should(
+      "have.value",
+      elements.optionsProduct[optionNumber]
+    );
+    cy.get(elements.selectedOptPr).should(
+      "have.text",
+      elements.expectedProduct[optionNumber]
+    );
+  }
+);
