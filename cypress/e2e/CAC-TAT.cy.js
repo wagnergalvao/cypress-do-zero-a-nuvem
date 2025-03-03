@@ -25,8 +25,14 @@ const elements = {
   expectedLblPr: "Produto",
   selectProduct: "[id=product]",
   selectedOptPr: "select#product option:selected",
-  optionsProduct: ["blog", "cursos", "mentoria", "youtube"],
-  expectedProduct: ["Blog", "Cursos", "Mentoria", "YouTube"],
+  optionsProduct: ["Selecione", "blog", "cursos", "mentoria", "youtube"],
+  expectedProduct: ["Selecione", "Blog", "Cursos", "Mentoria", "YouTube"],
+  divSupportType: "[id=support-type]",
+  expectedSuppTy: "Tipo de atendimento",
+  inputSupportTp: "[type=radio]",
+  optionsSuppTyp: ["ajuda", "elogio", "feedback"],
+  expectedSuppTp: ["Ajuda", "Elogio", "Feedback"],
+  selectedSuppTp: 'input[type="radio"]:checked',
   buttonSubmit: "[type=submit]",
   expectedSubmit: "Enviar",
   spanSuccess: "[class=success]",
@@ -39,7 +45,8 @@ var lastName = null;
 var email = null;
 var phone = null;
 var message = null;
-var productOption = Date.now() % elements.optionsProduct.length;
+var productOption = (Date.now() % 4) + 1;
+var supportOption = Date.now() % 3;
 
 class MessageForm {
   gerarDadosFake() {
@@ -322,6 +329,32 @@ describe("Central de Atendimento ao Cliente TAT", () => {
 
   it(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]} selecionado por seu Value`, () => {
     cy.selectProduct(elements, "", productOption);
+
+    cy.submitForm(elements, firstName, lastName, email, phone, message);
+
+    cy.contains(elements.spanSuccess, elements.expectedSuccess).should(
+      "be.visible"
+    );
+  });
+
+  it(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]} selecionado por seu Índice`, () => {
+    cy.selectProduct(elements, "Index", productOption);
+
+    cy.submitForm(elements, firstName, lastName, email, phone, message);
+
+    cy.contains(elements.spanSuccess, elements.expectedSuccess).should(
+      "be.visible"
+    );
+  });
+
+  it("Validar todas as opções do Tipo de atendimento", () => {
+    cy.validateSupportTypeOptions(elements);
+  });
+
+  it(`Enviar mensagem sobre o tipo de atendimento ${elements.expectedSuppTp[supportOption]}`, () => {
+    cy.selectSupportType(elements, supportOption);
+
+    cy.selectProduct(elements, "Index", productOption);
 
     cy.submitForm(elements, firstName, lastName, email, phone, message);
 

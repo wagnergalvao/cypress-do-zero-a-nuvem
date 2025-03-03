@@ -81,6 +81,7 @@ Cypress.Commands.add(
     cy.contains(elements.buttonSubmit, elements.expectedSubmit).click();
   }
 );
+
 Cypress.Commands.add(
   "selectProduct",
   (elements, selectionType, optionNumber) => {
@@ -108,3 +109,30 @@ Cypress.Commands.add(
     );
   }
 );
+
+Cypress.Commands.add("validateSupportTypeOptions", (elements) => {
+  cy.contains(elements.divSupportType, elements.expectedSuppTy);
+  cy.get(elements.inputSupportTp).each(($input, index) => {
+    cy.wrap($input).should("have.value", elements.optionsSuppTyp[index]);
+    cy.wrap($input)
+      .parent()
+      .then(($label) => {
+        expect($label.text().trim()).to.equal(elements.expectedSuppTp[index]);
+      });
+  });
+
+  Cypress.Commands.add("selectSupportType", (elements, supportOption) => {
+    cy.contains(elements.divSupportType, elements.expectedSuppTy);
+    cy.get(elements.inputSupportTp).check(
+      elements.optionsSuppTyp[supportOption]
+    );
+    cy.get("label")
+      .contains(elements.expectedSuppTp[supportOption])
+      .within(() => {
+        cy.get(elements.selectedSuppTp).should(
+          "have.value",
+          elements.optionsSuppTyp[supportOption]
+        );
+      });
+  });
+});
