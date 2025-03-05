@@ -27,12 +27,17 @@ const elements = {
   selectedOptPr: "select#product option:selected",
   optionsProduct: ["Selecione", "blog", "cursos", "mentoria", "youtube"],
   expectedProduct: ["Selecione", "Blog", "Cursos", "Mentoria", "YouTube"],
-  divSupportType: "[id=support-type]",
-  expectedSuppTy: "Tipo de atendimento",
-  inputSupportTp: "[type=radio]",
-  optionsSuppTyp: ["ajuda", "elogio", "feedback"],
-  expectedSuppTp: ["Ajuda", "Elogio", "Feedback"],
-  selectedSuppTp: 'input[type="radio"]:checked',
+  supportTypeElement: "[id=support-type]",
+  supportTypeText: "Tipo de atendimento",
+  supportTypeInput: "[type=radio]",
+  supportTypeValues: ["ajuda", "elogio", "feedback"],
+  supportTypeTexts: ["Ajuda", "Elogio", "Feedback"],
+  supportTypeChecked: 'input[type="radio"]:checked',
+  preferredContactElement: "[id=check]",
+  preferredContactText: "Qual seu meio de contato preferencial?",
+  preferredContactInput: "[type=checkbox]",
+  preferredContactValues: ["email", "phone"],
+  preferredContactTexts: ["E-mail", "Telefone"],
   buttonSubmit: "[type=submit]",
   expectedSubmit: "Enviar",
   spanSuccess: "[class=success]",
@@ -247,11 +252,15 @@ describe("Central de Atendimento ao Cliente TAT", () => {
 
   beforeEach(() => {
     msgForm.gerarDadosFake();
-    cy.visit("./src/index.html");
+    cy.accessPage(true, false);
   });
 
-  it("Acessar a pagina Central de Atendimento ao Cliente TAT", () => {
-    cy.title().should("equal", "Central de Atendimento ao Cliente TAT");
+  it.only("Acessar a pagina Central de Atendimento ao Cliente TAT", () => {
+    cy.accessPage(false, true);
+  });
+
+  it.only("Validar elementos do formulário", () => {
+    cy.ValidateFormElements();
   });
 
   it("Enviar mensagem com sucesso", () => {
@@ -351,7 +360,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     cy.validateSupportTypeOptions(elements);
   });
 
-  it(`Enviar mensagem sobre o tipo de atendimento ${elements.expectedSuppTp[supportOption]}`, () => {
+  it(`Enviar mensagem sobre o tipo de atendimento ${elements.supportTypeTexts[supportOption]}`, () => {
     cy.selectSupportType(elements, supportOption);
 
     cy.selectProduct(elements, "Index", productOption);
