@@ -36,6 +36,18 @@ Cypress.Commands.add("accessPage", (visit, validateTitle) => {
   }
 });
 
+Cypress.Commands.add("getFieldValue", (selector) => {
+  return cy.get(selector).invoke("val");
+});
+
+Cypress.Commands.add("setFieldValue", (selector, value, clearField) => {
+  if (clearField) {
+    cy.get(selector).clear().type(value);
+  } else {
+    cy.get(selector).type(value);
+  }
+});
+
 Cypress.Commands.add("validateFormTitle", () => {
   const { formTitle } = require("./objects.js");
 
@@ -112,7 +124,7 @@ Cypress.Commands.add("validatePhone", (visible) => {
   cy.validateRequiredMark(
     phone.requiredSelector,
     phone.requiredContains,
-    false
+    visible
   );
 
   if (visible) {
@@ -136,6 +148,15 @@ Cypress.Commands.add("validateProduct", () => {
   });
 });
 
+Cypress.Commands.add("validateSelectedProduct", (index) => {
+  const { product } = require("./objects.js");
+  cy.get(product.optionSelectorSelected)
+    .should("have.value", product.optionValueList[index])
+    .then(($option) => {
+      expect($option.text().trim()).to.equal(product.optionContentList[index]);
+    });
+});
+
 Cypress.Commands.add("validateSupport", () => {
   const { support } = require("./objects.js");
 
@@ -146,6 +167,19 @@ Cypress.Commands.add("validateSupport", () => {
       .should("be.visible")
       .and("contain", support.inputContentList[index]);
   });
+});
+
+Cypress.Commands.add("validateCheckedSupport", (index) => {
+  const { support } = require("./objects.js");
+  cy.get(support.inputSelectorChecked)
+    .should("have.value", support.inputValueList[index])
+    .then(($input) => {
+      cy.wrap($input)
+        .parent()
+        .then(($item) => {
+          expect($item.text().trim()).to.equal(support.inputContentList[index]);
+        });
+    });
 });
 
 Cypress.Commands.add("validateContact", () => {
@@ -209,7 +243,9 @@ Cypress.Commands.add("ValidateFormElements", () => {
   cy.validateEmail();
   cy.validatePhone();
   cy.validateProduct();
+  cy.validateSelectedProduct(0);
   cy.validateSupport();
+  cy.validateCheckedSupport(0);
   cy.validateContact();
   cy.validateMessage();
   cy.validateFileUpload();

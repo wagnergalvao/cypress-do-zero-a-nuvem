@@ -3,10 +3,11 @@
 // Cypress, do Zero à Nuvem
 // https://www.udemy.com/course/testes-automatizados-com-cypress-basico
 // ***********************************************
-import { fakerPT_BR as faker } from "@faker-js/faker";
+// Importando o faker
+const { faker } = require("@faker-js/faker/locale/pt_BR");
 
 const pageData = {
-  baseUrl: "../../src/index.html", // Caminho corrigido para acessar a pasta src
+  baseUrl: "../../src/index.html",
   title: "Central de Atendimento ao Cliente TAT",
 };
 
@@ -55,22 +56,24 @@ const product = {
   labelSelector: 'label[for="product"] strong',
   labelContains: "Produto",
   selectSelector: 'select[id="product"]',
+  optionSelectorSelected: 'select[id="product"] option:selected',
   optionSelectorList: [
-    'option[selected][disabled][value=""]',
+    'option[disabled][value=""]',
     'option[value="blog"]',
     'option[value="cursos"]',
     'option[value="mentoria"]',
     'option[value="youtube"]',
   ],
-  optionValueList: ["selecione", "blog", "cursos", "mentoria", "youtube"],
+  optionValueList: ["", "blog", "cursos", "mentoria", "youtube"],
   optionContentList: ["Selecione", "Blog", "Cursos", "Mentoria", "YouTube"],
 };
 
 const support = {
   divSelector: 'div[id="support-type"][class="field"] label strong',
   divContains: "Tipo de atendimento",
+  inputSelectorChecked: 'input[type="radio"]:checked',
   inputSelectorList: [
-    'label:has(input[type="radio"][name="atendimento-tat"][value="ajuda"][checked])',
+    'label:has(input[type="radio"][name="atendimento-tat"][value="ajuda"])',
     'label:has(input[type="radio"][name="atendimento-tat"][value="elogio"])',
     'label:has(input[type="radio"][name="atendimento-tat"][value="feedback"])',
   ],
@@ -118,7 +121,43 @@ const privacyPolicy = {
   linkContains: "Política de Privacidade",
 };
 
+const successMessage = {
+  spanSelector: 'span[class="success"] strong',
+  spanContains: "Mensagem enviada com sucesso.",
+};
+
+const errorMessage = {
+  spanSelector: 'span[class="error"] strong',
+  spanContains: "Valide os campos obrigatórios!",
+};
+
+const fName = faker.person.firstName();
+const lName = faker.person.lastName();
+const productList = product.optionSelectorList;
+const supportList = support.inputSelectorList;
+
+// Criando o objeto com os valores já definidos
+const simulatedData = {
+  firstName: fName,
+  lastName: lName,
+  email: faker.internet.email({
+    firstName: fName.toLowerCase(),
+    lastName: lName.toLowerCase(),
+  }),
+  phone: faker.phone.number("(##) #####-####"),
+  product: faker.number.int({
+    min: 1,
+    max: productList.length - 1,
+  }),
+  support: faker.number.int({
+    min: 0,
+    max: supportList.length - 1,
+  }),
+  message: faker.lorem.paragraph(2),
+};
+
 module.exports = {
+  simulatedData,
   pageData,
   formTitle,
   firstName,
@@ -132,4 +171,6 @@ module.exports = {
   fileUpload,
   submitButton,
   privacyPolicy,
+  successMessage,
+  errorMessage,
 };
