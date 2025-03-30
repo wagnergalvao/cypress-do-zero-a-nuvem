@@ -6,6 +6,10 @@
 // Importando o faker
 const { faker } = require("@faker-js/faker/locale/pt_BR");
 
+const fName = faker.person.firstName();
+const lName = faker.person.lastName();
+const phoneNumber = faker.phone.number({ style: "national" });
+
 const pageData = {
   baseUrl: "../../src/index.html",
   title: "Central de Atendimento ao Cliente TAT",
@@ -71,6 +75,7 @@ const product = {
 const support = {
   divSelector: 'div[id="support-type"][class="field"] label strong',
   divContains: "Tipo de atendimento",
+  inputSelector: 'label:has(input[type="radio"])',
   inputSelectorChecked: 'input[type="radio"]:checked',
   inputSelectorList: [
     'label:has(input[type="radio"][name="atendimento-tat"][value="ajuda"])',
@@ -84,6 +89,7 @@ const support = {
 const contact = {
   divSelector: 'div[id="check"] label strong',
   divContains: "Qual seu meio de contato preferencial?",
+  inputSelector: 'input[type="checkbox"]',
   inputSelectorList: [
     'input[type="checkbox"][id="email-checkbox"][name="email"][value="email"]',
     'input[type="checkbox"][id="phone-checkbox"][name="phone"][value="phone"]',
@@ -131,12 +137,16 @@ const errorMessage = {
   spanContains: "Valide os campos obrigatórios!",
 };
 
-const fName = faker.person.firstName();
-const lName = faker.person.lastName();
-const productList = product.optionSelectorList;
-const supportList = support.inputSelectorList;
+const prdIndex = faker.number.int({
+  min: 1,
+  max: product.optionSelectorList.length - 1,
+});
 
-// Criando o objeto com os valores já definidos
+const supIndex = faker.number.int({
+  min: 1,
+  max: support.inputSelector - 1,
+});
+
 const simulatedData = {
   firstName: fName,
   lastName: lName,
@@ -144,20 +154,14 @@ const simulatedData = {
     firstName: fName.toLowerCase(),
     lastName: lName.toLowerCase(),
   }),
-  phone: faker.phone.number("(##) #####-####"),
-  product: faker.number.int({
-    min: 1,
-    max: productList.length - 1,
-  }),
-  support: faker.number.int({
-    min: 0,
-    max: supportList.length - 1,
-  }),
+  phone: phoneNumber,
+  requiredPhone: phoneNumber.replace(/[^0-9]/g, ""),
+  productIndex: prdIndex,
+  supportIndex: supIndex,
   message: faker.lorem.paragraph(2),
 };
 
 module.exports = {
-  simulatedData,
   pageData,
   formTitle,
   firstName,
@@ -173,4 +177,5 @@ module.exports = {
   privacyPolicy,
   successMessage,
   errorMessage,
+  simulatedData,
 };

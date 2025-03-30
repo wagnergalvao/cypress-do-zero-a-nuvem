@@ -1,4 +1,11 @@
-import { fakerPT_BR as faker } from "@faker-js/faker";
+import { simulatedData, submitButton } from "../support/objects.js";
+
+var firstName = null;
+var lastName = null;
+var email = null;
+var phone = null;
+var message = null;
+
 const elements = {
   labelFirstName: "[for=firstName]",
   expectedLblFN: "Nome",
@@ -45,13 +52,6 @@ const elements = {
   spanError: "[class=error]",
   expectedError: "Valide os campos obrigatórios!",
 };
-var firstName = null;
-var lastName = null;
-var email = null;
-var phone = null;
-var message = null;
-var productOption = (Date.now() % 4) + 1;
-var supportOption = Date.now() % 3;
 
 class MessageForm {
   gerarDadosFake() {
@@ -251,7 +251,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
   const msgForm = new MessageForm();
 
   beforeEach(() => {
-    msgForm.gerarDadosFake();
+    // msgForm.gerarDadosFake();
     cy.accessPage(true, false);
   });
 
@@ -263,8 +263,19 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     cy.ValidateFormElements();
   });
 
-  it("Enviar mensagem com sucesso", () => {
-    msgForm.enviarMensagemComSucesso();
+  it.only("Enviar mensagem com sucesso", () => {
+    cy.submitForm(
+      { name: "firstName", content: simulatedData.firstName, clear: false },
+      { name: "lastName", content: simulatedData.lastName, clear: false },
+      { name: "email", content: simulatedData.email, clear: false },
+      { name: "product", content: simulatedData.productIndex },
+      { name: "support", content: simulatedData.supportIndex },
+      { name: "contact", content: "all", uncheck: false },
+      { name: "phone", content: simulatedData.requiredPhone, clear: false },
+      { name: "message", content: simulatedData.message, clear: false },
+      true
+    );
+    cy.validateSuccessMessage();
   });
 
   it("Aceitar somente números no telefone", () => {
@@ -281,8 +292,9 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     msgForm.validarMensagemSucesso();
   });
 
-  it("Bloquear mensagem sem campos obrigatórios", () => {
-    msgForm.bloquearMensagemSemCamposObrigatorios();
+  it.only("Bloquear mensagem sem campos obrigatórios", () => {
+    cy.clickElement(submitButton.buttonSelector);
+    cy.validateErrorMessage();
   });
 
   it("Bloquear mensagem com email inválido", () => {
@@ -326,8 +338,8 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     );
   });
 
-  it(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]} selecionado por seu Texto`, () => {
-    cy.selectProduct(elements, "Text", productOption);
+  it(`Enviar mensagem sobre o produto ${simulatedData.productName} selecionado por seu Texto`, () => {
+    cy.selectProduct(elements, "Text", simulatedData.productIndex);
 
     cy.submitForm(elements, firstName, lastName, email, phone, message);
 
@@ -336,8 +348,8 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     );
   });
 
-  it(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]} selecionado por seu Value`, () => {
-    cy.selectProduct(elements, "", productOption);
+  it(`Enviar mensagem sobre o produto ${simulatedData.productName} selecionado por seu Value`, () => {
+    cy.selectProduct(elements, "", simulatedData.productIndex);
 
     cy.submitForm(elements, firstName, lastName, email, phone, message);
 
@@ -346,8 +358,8 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     );
   });
 
-  it(`Enviar mensagem sobre o produto ${elements.expectedProduct[productOption]} selecionado por seu Índice`, () => {
-    cy.selectProduct(elements, "Index", productOption);
+  it(`Enviar mensagem sobre o produto ${simulatedData.productName} selecionado por seu Índice`, () => {
+    cy.selectProduct(elements, "Index", simulatedData.productIndex);
 
     cy.submitForm(elements, firstName, lastName, email, phone, message);
 
@@ -360,10 +372,10 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     cy.validateSupportTypeOptions(elements);
   });
 
-  it(`Enviar mensagem sobre o tipo de atendimento ${elements.supportTypeTexts[supportOption]}`, () => {
-    cy.selectSupportType(elements, supportOption);
+  it(`Enviar mensagem sobre o tipo de atendimento ${simulatedData.supportName}`, () => {
+    cy.selectSupportType(elements, simulatedData.supportIndex);
 
-    cy.selectProduct(elements, "Index", productOption);
+    cy.selectProduct(elements, "Index", simulatedData.productIndex);
 
     cy.submitForm(elements, firstName, lastName, email, phone, message);
 

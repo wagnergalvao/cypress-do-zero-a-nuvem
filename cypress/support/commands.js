@@ -24,9 +24,23 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-Cypress.Commands.add("accessPage", (visit, validateTitle) => {
-  const { pageData } = require("./objects.js");
+import { pageData } from "./objects.js";
+import { formTitle } from "./objects.js";
+import { firstName } from "./objects.js";
+import { lastName } from "./objects.js";
+import { email } from "./objects.js";
+import { phone } from "./objects.js";
+import { product } from "./objects.js";
+import { support } from "./objects.js";
+import { contact } from "./objects.js";
+import { message } from "./objects.js";
+import { fileUpload } from "./objects.js";
+import { submitButton } from "./objects.js";
+import { privacyPolicy } from "./objects.js";
+import { successMessage } from "./objects.js";
+import { errorMessage } from "./objects.js";
 
+Cypress.Commands.add("accessPage", (visit, validateTitle) => {
   if (visit) {
     cy.visit(pageData.baseUrl);
   }
@@ -48,9 +62,11 @@ Cypress.Commands.add("setFieldValue", (selector, value, clearField) => {
   }
 });
 
-Cypress.Commands.add("validateFormTitle", () => {
-  const { formTitle } = require("./objects.js");
+Cypress.Commands.add("clickElement", (selector) => {
+  cy.get(selector).click();
+});
 
+Cypress.Commands.add("validateFormTitle", () => {
   cy.contains(formTitle.titleSelector, formTitle.titleContains).should(
     "be.visible"
   );
@@ -75,8 +91,6 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add("validateFirstName", () => {
-  const { firstName } = require("./objects.js");
-
   cy.contains(firstName.labelSelector, firstName.labelContains).should(
     "be.visible"
   );
@@ -91,8 +105,6 @@ Cypress.Commands.add("validateFirstName", () => {
 });
 
 Cypress.Commands.add("validateLastName", () => {
-  const { lastName } = require("./objects.js");
-
   cy.contains(lastName.labelSelector, lastName.labelContains).should(
     "be.visible"
   );
@@ -107,8 +119,6 @@ Cypress.Commands.add("validateLastName", () => {
 });
 
 Cypress.Commands.add("validateEmail", () => {
-  const { email } = require("./objects.js");
-
   cy.contains(email.labelSelector, email.labelContains).should("be.visible");
 
   cy.validateRequiredMark(email.requiredSelector, email.requiredContains, true);
@@ -117,8 +127,6 @@ Cypress.Commands.add("validateEmail", () => {
 });
 
 Cypress.Commands.add("validatePhone", (visible) => {
-  const { phone } = require("./objects.js");
-
   cy.contains(phone.labelSelector, phone.labelContains).should("be.visible");
 
   cy.validateRequiredMark(
@@ -135,21 +143,26 @@ Cypress.Commands.add("validatePhone", (visible) => {
 });
 
 Cypress.Commands.add("validateProduct", () => {
-  const { product } = require("./objects.js");
-
   cy.contains(product.labelSelector, product.labelContains).should(
     "be.visible"
   );
 
-  cy.get(product.selectSelector).should("be.visible");
-
-  cy.wrap(product.optionSelectorList).each(($optionSelector, index) => {
-    cy.contains($optionSelector, product.optionContentList[index]);
+  cy.wrap(product.optionSelectorList).each((option, index) => {
+    const $option = Cypress.$(option);
+    expect($option.attr("value")).to.equal(product.optionValueList[index]);
+    expect($option.text().trim()).to.equal(product.optionContentList[index]);
   });
 });
 
+Cypress.Commands.add("selectProduct", (value) => {
+  if (!typeof value === "number") {
+    throw new Error("Informar o índice da opção");
+  }
+
+  cy.get(product.selectSelector).select(product.optionValueList[value]);
+});
+
 Cypress.Commands.add("validateSelectedProduct", (index) => {
-  const { product } = require("./objects.js");
   cy.get(product.optionSelectorSelected)
     .should("have.value", product.optionValueList[index])
     .then(($option) => {
@@ -158,19 +171,28 @@ Cypress.Commands.add("validateSelectedProduct", (index) => {
 });
 
 Cypress.Commands.add("validateSupport", () => {
-  const { support } = require("./objects.js");
-
   cy.contains(support.divSelector, support.divContains).should("be.visible");
 
-  cy.wrap(support.inputSelectorList).each((inputSelector, index) => {
-    cy.get(inputSelector)
-      .should("be.visible")
-      .and("contain", support.inputContentList[index]);
+  cy.get(support.inputSelector).each(($label, index) => {
+    expect($label.text().trim()).to.equal(support.inputContentList[index]);
+    cy.wrap($label.find("input")).should(
+      "have.attr",
+      "value",
+      support.inputValueList[index]
+    );
+  });
+});
+
+Cypress.Commands.add("selectSupport", (value) => {
+  if (!typeof value === "number") {
+    throw new Error("Informar o índice da opção");
+  }
+  cy.get(support.inputSelector).then(($label) => {
+    cy.wrap($label.find("input")).check(support.inputValueList[value]);
   });
 });
 
 Cypress.Commands.add("validateCheckedSupport", (index) => {
-  const { support } = require("./objects.js");
   cy.get(support.inputSelectorChecked)
     .should("have.value", support.inputValueList[index])
     .then(($input) => {
@@ -183,22 +205,50 @@ Cypress.Commands.add("validateCheckedSupport", (index) => {
 });
 
 Cypress.Commands.add("validateContact", () => {
-  const { contact } = require("./objects.js");
-
   cy.contains(contact.divSelector, contact.divContains).should("be.visible");
 
-  cy.wrap(contact.inputSelectorList).each((inputSelector) => {
-    cy.get(inputSelector).should("be.visible");
+  cy.get(contact.inputSelectorList).each((input, index) => {
+    cy.get(input).then(($input) => {
+      expect($input.attr("value")).to.equal(contact.inputValueList[index]);
+    });
   });
 
-  cy.wrap(contact.labelSelectorList).each((labelSelector, index) => {
-    cy.contains(labelSelector, contact.labelContentList[index]);
+  cy.get(contact.labelSelectorList).each((label, index) => {
+    const $label = Cypress.$(label);
+
+    expect($label.text().trim()).to.equal(contact.labelContentList[index]);
+  });
+});
+
+Cypress.Commands.add("selectContact", (value, uncheck) => {
+  if (!typeof value === "number") {
+    if (!typeof value === "text" && !value.toUpperCase() === "ALL") {
+      throw new Error("Informar o índice da opção ou all para todos");
+    }
+  }
+
+  if (!typeof uncheck === "boolean") {
+    throw new Error("Informar false para marcar ou true para desmarcar");
+  }
+
+  cy.get(contact.inputSelector).each((inputs, index) => {
+    const $input = Cypress.$(inputs);
+    var checkitem = false;
+
+    if ($input.is(":checked") && uncheck) {
+      checkitem = true;
+    }
+
+    if (!$input.is(":checked") && !uncheck) {
+      checkitem = true;
+    }
+    if (checkitem && (value.toUpperCase() === "ALL" || value === index)) {
+      cy.wrap($input).check(contact.inputValueList[index]);
+    }
   });
 });
 
 Cypress.Commands.add("validateMessage", () => {
-  const { message } = require("./objects.js");
-
   cy.contains(message.labelSelector, message.labelContains).should(
     "be.visible"
   );
@@ -213,25 +263,32 @@ Cypress.Commands.add("validateMessage", () => {
 });
 
 Cypress.Commands.add("validateFileUpload", () => {
-  const { fileUpload } = require("./objects.js");
-
   cy.contains(fileUpload.labelSelector, fileUpload.labelContains).should(
     "be.visible"
   );
-
   cy.get(fileUpload.inputSelector);
 });
 
 Cypress.Commands.add("validateSubmitButton", () => {
-  const { submitButton } = require("./objects.js");
   cy.contains(submitButton.buttonSelector, submitButton.buttonContains).should(
     "be.visible"
   );
 });
 
 Cypress.Commands.add("validateprivacyPolicy", () => {
-  const { privacyPolicy } = require("./objects.js");
   cy.contains(privacyPolicy.linkSelector, privacyPolicy.linkContains).should(
+    "be.visible"
+  );
+});
+
+Cypress.Commands.add("validateSuccessMessage", () => {
+  cy.contains(successMessage.spanSelector, successMessage.spanContains).should(
+    "be.visible"
+  );
+});
+
+Cypress.Commands.add("validateErrorMessage", () => {
+  cy.contains(errorMessage.spanSelector, errorMessage.spanContains).should(
     "be.visible"
   );
 });
@@ -255,6 +312,104 @@ Cypress.Commands.add("ValidateFormElements", () => {
 
 Cypress.Commands.add(
   "submitForm",
+  (
+    firstNameField,
+    lastNameField,
+    emailField,
+    productSelection,
+    supportSelection,
+    choosingContacts,
+    phoneField,
+    messageField,
+    submitForm
+  ) => {
+    if (
+      firstNameField !== null &&
+      firstNameField.name == "firstName" &&
+      firstNameField.content !== false
+    ) {
+      cy.setFieldValue(
+        firstName.inputSelector,
+        firstNameField.content,
+        firstNameField.clearField
+      );
+    }
+
+    if (
+      lastNameField !== null &&
+      lastNameField.name == "lastName" &&
+      lastNameField.content !== false
+    ) {
+      cy.setFieldValue(
+        lastName.inputSelector,
+        lastNameField.content,
+        lastNameField.clearField
+      );
+    }
+
+    if (
+      emailField !== null &&
+      emailField.name == "email" &&
+      emailField.content !== false
+    ) {
+      cy.setFieldValue(
+        email.inputSelector,
+        emailField.content,
+        emailField.clearField
+      );
+    }
+    if (
+      productSelection !== null &&
+      productSelection.name == "product" &&
+      productSelection.content !== false
+    ) {
+      cy.selectProduct(productSelection.content);
+    }
+
+    if (
+      supportSelection !== null &&
+      supportSelection.name == "support" &&
+      supportSelection.content !== false
+    ) {
+      cy.selectSupport(supportSelection.content);
+    }
+
+    if (choosingContacts !== null && choosingContacts.name == "contact") {
+      cy.selectContact(choosingContacts.content, choosingContacts.uncheck);
+    }
+
+    if (
+      phoneField !== null &&
+      phoneField.name == "phone" &&
+      phoneField.content !== false
+    ) {
+      cy.setFieldValue(
+        phone.inputSelector,
+        phoneField.content,
+        phoneField.clearField
+      );
+    }
+
+    if (
+      messageField !== null &&
+      messageField.name == "message" &&
+      messageField.content !== false
+    ) {
+      cy.setFieldValue(
+        message.textareaSelector,
+        messageField.content,
+        messageField.clearField
+      );
+    }
+
+    if (submitForm) {
+      cy.clickElement(submitButton.buttonSelector);
+    }
+  }
+);
+
+Cypress.Commands.add(
+  "submitFormOld",
   (elements, firstName, lastName, email, phone, message) => {
     if (firstName !== null) {
       cy.contains(elements.labelFirstName, elements.expectedLblFN).then(() => {
@@ -308,34 +463,6 @@ Cypress.Commands.add(
     }
 
     cy.contains(elements.buttonSubmit, elements.expectedSubmit).click();
-  }
-);
-
-Cypress.Commands.add(
-  "selectProduct",
-  (elements, selectionType, optionNumber) => {
-    var option = null;
-    cy.contains(elements.labelProduct, elements.expectedLblPr);
-    switch (selectionType.toUpperCase()) {
-      case "TEXT":
-        option = elements.expectedProduct[optionNumber];
-        break;
-      case "INDEX":
-        option = optionNumber;
-        break;
-      default:
-        option = elements.optionsProduct[optionNumber];
-        break;
-    }
-    cy.get(elements.selectProduct).select(option);
-    cy.get(elements.selectedOptPr).should(
-      "have.value",
-      elements.optionsProduct[optionNumber]
-    );
-    cy.get(elements.selectedOptPr).should(
-      "have.text",
-      elements.expectedProduct[optionNumber]
-    );
   }
 );
 
