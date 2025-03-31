@@ -50,6 +50,10 @@ Cypress.Commands.add("accessPage", (visit, validateTitle) => {
   }
 });
 
+Cypress.Commands.add("getFieldText", (selector) => {
+  return cy.get(selector).invoke("text");
+});
+
 Cypress.Commands.add("getFieldValue", (selector) => {
   return cy.get(selector).invoke("val");
 });
@@ -242,8 +246,13 @@ Cypress.Commands.add("selectContact", (value, uncheck) => {
     if (!$input.is(":checked") && !uncheck) {
       checkitem = true;
     }
-    if (checkitem && (value.toUpperCase() === "ALL" || value === index)) {
-      cy.wrap($input).check(contact.inputValueList[index]);
+    if (checkitem) {
+      if (
+        (typeof value === "text" && value.toUpperCase() == "ALL") ||
+        (typeof value === "number" && value == index)
+      ) {
+        cy.wrap($input).check(contact.inputValueList[index]);
+      }
     }
   });
 });
