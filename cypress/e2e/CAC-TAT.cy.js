@@ -1,4 +1,9 @@
-import { simulatedData, submitButton, phone } from "../support/objects.js";
+import {
+  simulatedData,
+  submitButton,
+  phone,
+  fileUpload,
+} from "../support/objects.js";
 
 describe("Central de Atendimento ao Cliente TAT", () => {
   beforeEach(() => {
@@ -31,6 +36,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         clearField: false,
       },
       { name: "message", content: simulatedData.message, clearField: false },
+      {},
       true
     );
     cy.validateSuccessMessage();
@@ -50,6 +56,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         content: "Telefone digitado: Número do Telefone",
         clear: false,
       },
+      {},
       false
     );
     cy.getFieldText(phone.inputSelector).should("be.empty");
@@ -73,6 +80,11 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         clearField: false,
       },
       { name: "message", content: simulatedData.message, clearField: false },
+      {
+        name: "files",
+        content: fileUpload.inputFilesNames[simulatedData.fileIndex],
+        clearField: false,
+      },
       true
     );
     cy.validateSuccessMessage();
@@ -88,6 +100,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
       {},
       {},
       { name: "message", content: "Mensagem errada", clearField: false },
+      {},
       false
     );
     cy.submitForm(
@@ -103,6 +116,64 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         clearField: false,
       },
       { name: "message", content: simulatedData.message, clearField: true },
+      {},
+      true
+    );
+    cy.validateSuccessMessage();
+  });
+
+  it("Enviar mensagem com anexo selecionado", () => {
+    cy.submitForm(
+      {
+        name: "firstName",
+        content: simulatedData.firstName,
+        clearField: false,
+      },
+      { name: "lastName", content: simulatedData.lastName, clearField: false },
+      { name: "email", content: simulatedData.email, clearField: false },
+      { name: "product", content: simulatedData.productIndex },
+      { name: "support", content: simulatedData.supportIndex },
+      { name: "contact", content: "all", uncheck: false },
+      {
+        name: "phone",
+        content: simulatedData.requiredPhone,
+        clearField: false,
+      },
+      { name: "message", content: simulatedData.message, clearField: false },
+      {
+        name: "files",
+        content: fileUpload.inputFilesNames[simulatedData.fileIndex],
+        clearField: false,
+      },
+      true
+    );
+    cy.validateSuccessMessage();
+  });
+
+  it("Enviar mensagem com anexo arrastado", () => {
+    cy.submitForm(
+      {
+        name: "firstName",
+        content: simulatedData.firstName,
+        clearField: false,
+      },
+      { name: "lastName", content: simulatedData.lastName, clearField: false },
+      { name: "email", content: simulatedData.email, clearField: false },
+      { name: "product", content: simulatedData.productIndex },
+      { name: "support", content: simulatedData.supportIndex },
+      { name: "contact", content: "all", uncheck: false },
+      {
+        name: "phone",
+        content: simulatedData.requiredPhone,
+        clearField: false,
+      },
+      { name: "message", content: simulatedData.message, clearField: false },
+      {
+        name: "files",
+        content: fileUpload.inputFilesNames[simulatedData.fileIndex],
+        clearField: false,
+        dragDrop: true,
+      },
       true
     );
     cy.validateSuccessMessage();
@@ -135,6 +206,8 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         clearField: false,
       },
       { name: "message", content: simulatedData.message, clearField: false },
+      {},
+      {},
       true
     );
     cy.validateErrorMessage();
@@ -154,6 +227,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         clearField: false,
       },
       { name: "message", content: simulatedData.message, clearField: false },
+      {},
       true
     );
     cy.validateErrorMessage();
@@ -177,6 +251,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         clearField: false,
       },
       { name: "message", content: simulatedData.message, clearField: false },
+      {},
       true
     );
     cy.validateErrorMessage();
@@ -200,6 +275,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         clearField: false,
       },
       { name: "message", content: simulatedData.message, clearField: false },
+      {},
       true
     );
     cy.validateErrorMessage();
@@ -219,6 +295,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
       { name: "contact", content: 1, uncheck: false },
       {},
       { name: "message", content: simulatedData.message, clearField: false },
+      {},
       true
     );
     cy.validateErrorMessage();
@@ -240,6 +317,7 @@ describe("Central de Atendimento ao Cliente TAT", () => {
         content: simulatedData.requiredPhone,
         clearField: false,
       },
+      {},
       {},
       true
     );

@@ -4,7 +4,7 @@
 // https://www.udemy.com/course/testes-automatizados-com-cypress-basico
 // ***********************************************
 // Importando o faker
-const { faker } = require("@faker-js/faker/locale/pt_BR");
+import { faker } from "@faker-js/faker/locale/pt_BR";
 
 const fName = faker.person.firstName();
 const lName = faker.person.lastName();
@@ -115,6 +115,18 @@ const fileUpload = {
   labelSelector: 'label[for="file-upload"] strong',
   labelContains: "Adicone um anexo",
   inputSelector: 'input[type="file"][id="file-upload"]',
+  inputFilesNames: [
+    "cypress/uploads/CNH-FAKE-1.jpg",
+    "cypress/uploads/CPF-FAKE-1.jpg",
+    "cypress/uploads/RG-FAKE-1.jpg",
+    "cypress/uploads/TituloEleitoral-FAKE-1.jpg",
+  ],
+  inputContentList: [
+    "CNH-FAKE-1.jpg",
+    "CPF-FAKE-1.jpg",
+    "RG-FAKE-1.jpg",
+    "TituloEleitoral-FAKE-1.jpg",
+  ],
 };
 
 const submitButton = {
@@ -143,8 +155,13 @@ const prdIndex = faker.number.int({
 });
 
 const supIndex = faker.number.int({
-  min: 1,
-  max: support.inputSelector - 1,
+  min: 0,
+  max: support.inputSelector.length - 1,
+});
+
+const uploadIndex = faker.number.int({
+  min: 0,
+  max: fileUpload.inputFilesNames.length - 1,
 });
 
 const simulatedData = {
@@ -159,9 +176,10 @@ const simulatedData = {
   productIndex: prdIndex,
   supportIndex: supIndex,
   message: faker.lorem.paragraph(2),
+  fileIndex: uploadIndex,
 };
 
-module.exports = {
+export default {
   pageData,
   formTitle,
   firstName,

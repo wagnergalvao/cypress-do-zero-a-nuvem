@@ -257,6 +257,26 @@ Cypress.Commands.add("selectContact", (value, uncheck) => {
   });
 });
 
+Cypress.Commands.add("selectFiles", (fileNames, clearInput, dragDrop) => {
+  var files = Array.isArray(fileNames) ? fileNames : [fileNames];
+  var drag = typeof dragDrop === "boolean" ? { action: "drag-drop" } : {};
+
+  if (clearInput) {
+    cy.get(fileUpload.inputSelector).clear();
+  }
+
+  cy.get(fileUpload.inputSelector)
+    .selectFile(files, drag)
+    .then((input) => {
+      expect(input.length).to.equal(files.length);
+      input.each((index) => {
+        expect(fileUpload.inputContentList).to.include(
+          input[index].files[index].name
+        );
+      });
+    });
+});
+
 Cypress.Commands.add("validateMessage", () => {
   cy.contains(message.labelSelector, message.labelContains).should(
     "be.visible"
@@ -330,6 +350,7 @@ Cypress.Commands.add(
     choosingContacts,
     phoneField,
     messageField,
+    filesSelection,
     submitForm
   ) => {
     if (
@@ -367,6 +388,7 @@ Cypress.Commands.add(
         emailField.clearField
       );
     }
+
     if (
       productSelection !== null &&
       productSelection.name == "product" &&
@@ -411,97 +433,20 @@ Cypress.Commands.add(
       );
     }
 
+    if (
+      filesSelection !== null &&
+      filesSelection.name == "files" &&
+      filesSelection.content !== false
+    ) {
+      cy.selectFiles(
+        filesSelection.content,
+        filesSelection.clearField,
+        filesSelection.dragDrop
+      );
+    }
+
     if (submitForm) {
       cy.clickElement(submitButton.buttonSelector);
     }
   }
 );
-
-Cypress.Commands.add(
-  "submitFormOld",
-  (elements, firstName, lastName, email, phone, message) => {
-    if (firstName !== null) {
-      cy.contains(elements.labelFirstName, elements.expectedLblFN).then(() => {
-        cy.contains(elements.requiredMark, elements.expectedRequired).should(
-          "be.visible"
-        );
-        cy.get(elements.inputFirstName).type(firstName);
-      });
-    }
-
-    if (lastName !== null) {
-      cy.contains(elements.labelLastName, elements.expectedLblLN).then(() => {
-        cy.contains(elements.requiredMark, elements.expectedRequired).should(
-          "be.visible"
-        );
-        cy.get(elements.inputLastName).type(lastName);
-      });
-    }
-
-    if (email !== null) {
-      cy.contains(elements.labelEmail, elements.expectedLblEm).then(() => {
-        cy.contains(elements.requiredMark, elements.expectedRequired).should(
-          "be.visible"
-        );
-        cy.get(elements.inputEmail).type(email);
-      });
-    }
-
-    if (phone !== null) {
-      cy.contains(elements.labelPhone, elements.expectedLblPh).then(() => {
-        if (
-          cy
-            .contains(elements.requiredMark, elements.expectedRequired)
-            .should("be.visible")
-        ) {
-          cy.get(elements.inputPhone).type(phone);
-        }
-      });
-    }
-
-    if (message !== null) {
-      cy.contains(elements.labelMessage, elements.expectedLblT1);
-      cy.contains(elements.labelMessage, elements.expectedLblT2).then(() => {
-        cy.contains(elements.requiredMark, elements.expectedRequired).should(
-          "be.visible"
-        );
-        cy.get(elements.textAreaMessage).type(message, {
-          delay: 0,
-        });
-      });
-    }
-
-    cy.contains(elements.buttonSubmit, elements.expectedSubmit).click();
-  }
-);
-
-Cypress.Commands.add("validateSupportTypeOptions", (elements) => {
-  cy.contains(elements.supportTypeElement, elements.supportTypeText);
-  cy.get(elements.supportTypeInput).each(($input, index) => {
-    cy.wrap($input).should("have.value", elements.supportTypeValues[index]);
-    cy.wrap($input)
-      .parent()
-      .then(($item) => {
-        expect($item.text().trim()).to.equal(elements.supportTypeTexts[index]);
-      });
-  });
-});
-
-Cypress.Commands.add("selectSupportType", (elements, supportOption) => {
-  cy.contains(
-    elements.supportTypeElement,
-    elements.supportTypeText[supportOption]
-  );
-  cy.get(elements.supportTypeInput)
-    .check(elements.supportTypeValues[supportOption])
-    .then(($input) => {
-      expect($input).to.have.value(elements.supportTypeValues[supportOption]);
-      cy.wrap($input)
-        .parent()
-        .then(($item) => {
-          expect($item.text().trim()).to.equal(
-            elements.supportTypeTexts[supportOption]
-          );
-        });
-    });
-});
